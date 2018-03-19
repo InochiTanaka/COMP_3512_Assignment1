@@ -105,7 +105,7 @@ GooglePageRank::GooglePageRank()
 	matrixRank = initRank(matrixRank);
 	matrixRank = getRank(matrixM, matrixRank);
 
-	printf("Sum of Row:\n");
+	printf("Page Rank before divide by sum:\n");
 	showRank(matrixRank);
 	
 	matrixRank = getPageRank(matrixRank);
@@ -302,7 +302,8 @@ std::vector< std::vector<double> > GooglePageRank::initMatrixQ(int size)
 		}
 	}
 
-	//showMatrix(matrix);
+	printf("initial matrixQ:\n");
+	showMatrix(matrix);
 
 	return matrix;
 }
@@ -317,6 +318,8 @@ std::vector< std::vector<double> > GooglePageRank::initMatrixM(int size)
 		matrix[i].resize(size);
 	}
 
+	printf("initial matrixM:\n");
+	showMatrix(matrix);
 	return matrix;
 }
 
