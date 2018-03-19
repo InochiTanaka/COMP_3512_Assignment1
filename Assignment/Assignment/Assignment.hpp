@@ -1,6 +1,10 @@
 #pragma once
 #include <iostream>
 #include <iomanip>
+#include <stdio.h>
+#include <fstream>
+#include <sstream>
+#include <math.h>
 #include <vector>
 
 class GooglePageRank
@@ -11,6 +15,8 @@ class GooglePageRank
 
 	public:
 		GooglePageRank();
+		std::vector<double> getData(std::string fileName);
+		std::vector<std::vector<double>> getMatrix(std::vector<double> list);
 		std::vector<std::vector<double>> ApplyImportance(std::vector<std::vector<double>> matrix);
 		std::vector<std::vector<double>> ApplyProbability(std::vector<std::vector<double>> matrix);
 		std::vector<std::vector<double>> ApplyAdjust(std::vector<std::vector<double>> matrix);

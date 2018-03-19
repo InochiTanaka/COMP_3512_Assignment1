@@ -11,7 +11,7 @@ int main(void)
 GooglePageRank::GooglePageRank()
 {
 
-	std::vector< std::vector<double> > matrixW;
+	std::vector<double> listW;
 	std::vector< std::vector<double> > matrixG;
 	std::vector< std::vector<double> > matrixS;
 
@@ -19,20 +19,32 @@ GooglePageRank::GooglePageRank()
 
 	std::vector<double> matrixRank;
 
+	std::string fileName = "connec-tivity.txt";
 
-	matrixW = {
-		{ 0, 0, 0, 0 },
-		{ 0, 0, 0, 0 },
-		{ 0, 0, 0, 0 },
-		{ 0, 0, 0, 0 }
-		};
+	printf("Initial input Data:\n");
+	listW = getData(fileName);
 
-	matrixG = { 
-		{ 0, 1, 1, 0 }, 
-		{ 1, 0, 1, 0 },
-		{ 1, 1, 0, 0 },
-		{ 0, 0, 0, 0 }
-		};
+	matrixG = getMatrix(listW);
+
+	//matrixG = { 
+	//	{ 0, 1, 1, 0 }, 
+	//	{ 1, 0, 1, 0 },
+	//	{ 1, 1, 0, 0 },
+	//	{ 0, 0, 0, 0 }
+	//	};
+
+	//The result should be:
+	//rank = 1.2698 / 3.999 = 0.3175
+	//	1.2698 / 3.999 0.3175
+	//	1.2698 / 3.999 0.3175
+	//	0.1905 / 3.999 0.0476
+
+	//0.3175
+	//0.3175
+	//0.3175
+	//0.0476
+
+
 
 	//matrixG = {
 	//	{0, 1, 1, 1, 1, 1, 1},
@@ -44,7 +56,16 @@ GooglePageRank::GooglePageRank()
 	//	{1, 1, 0, 1, 0, 1, 0}
 	//};
 
-	printf("Initial input Data:\n");
+	//The result should be:
+	//A = 0.190277
+	//B = 0.095439
+	//C = 0.148268
+	//D = 0.171204
+	//E = 0.129194
+	//F = 0.120589
+	//G = 0.145029
+
+	printf("Initial input Data on Matrix:\n");
 	showMatrix(matrixG);
 
 	matrixS = ApplyImportance(matrixG);
@@ -90,6 +111,63 @@ GooglePageRank::GooglePageRank()
 	matrixRank = getPageRank(matrixRank);
 	printf("Page Rank:\n");
 	showRank(matrixRank);
+}
+
+std::vector<double> GooglePageRank::getData(std::string fileName)
+{
+	std::string str;
+	std::vector<double> list;
+
+	std::ifstream ifs(fileName);
+
+	while(std::getline(ifs, str))
+	{
+		std::string tmp;
+		std::istringstream stream(str);
+
+		std::cout << " ";
+		while (getline(stream, tmp, ' '))
+		{
+			list.push_back(std::stod(tmp));
+
+			std:: cout << tmp << " ";
+		}
+	}
+	std::cout << "\n\n";
+	return list;
+}
+
+std::vector< std::vector<double> > GooglePageRank::getMatrix(std::vector<double> list)
+{
+	std::string str;
+
+	double sqrtNumList = std::sqrt(list.size());
+
+	std::vector< std::vector<double> > matrix;
+
+	matrix.resize(sqrtNumList);
+	for (int i = 0; i < sqrtNumList; i++) {
+		matrix[i].resize(sqrtNumList);
+	}
+
+	//try// ((int)sqrtNumList*(int)sqrtNumList == (double)list.size())
+	//{
+		int count = 0;
+		for (int i = 0; i < matrix.size(); i++)
+		{
+			for (int j = 0; j < matrix.size(); j++)
+			{
+
+				matrix[i][j] = list[count++];
+			}
+		}
+	//}
+	//catch()
+	//{
+	//	throw "Exception : Input Data is not good for Matrix\n";
+	//}
+
+	return matrix;
 }
 
 std::vector< std::vector<double> > GooglePageRank::ApplyImportance(std::vector< std::vector<double> > matrix)
