@@ -180,7 +180,7 @@ std::vector< std::vector<double> > GooglePageRank::ApplyImportance(std::vector< 
 		count = 0;
 		for (int j = 0; j < matrix.size(); j++)
 		{
-			if (matrix[i][j] == 1)
+			if (matrix[j][i] == 1)
 			{
 				count++;
 			}
@@ -190,9 +190,9 @@ std::vector< std::vector<double> > GooglePageRank::ApplyImportance(std::vector< 
 
 		for (int j = 0; j < matrix.size(); j++)
 		{
-			if (matrix[i][j] == 1)
+			if (matrix[j][i] == 1)
 			{
-				matrix[i][j] = importance;
+				matrix[j][i] = importance;
 			}
 		}
 	}
@@ -214,7 +214,7 @@ std::vector< std::vector<double> > GooglePageRank::ApplyProbability(std::vector<
 		}
 
 
-		if (sum != 1)
+		if (sum == 0)
 		{
 			probability = (1 - sum) / (double)matrix.size();
 
@@ -263,9 +263,9 @@ std::vector< std::vector<double> > GooglePageRank::ApplyTransition(std::vector< 
 	matrixS = prepareS(matrixS, p);// Get S'
 	matrixQ = prepareQ(matrixQ, p);// Get Q'
 
-	printf("matrixS:\n");
+	printf("matrixS ( matrixS = %.2f * S ) :\n");
 	showMatrix(matrixS);
-	printf("matrixQ:\n");
+	printf("matrixQ ( matrixQ = (1 - %.2f ) * Q) :\n");
 	showMatrix(matrixQ);
 
 	//M = S' + Q'
@@ -277,7 +277,7 @@ std::vector< std::vector<double> > GooglePageRank::ApplyTransition(std::vector< 
 		}
 	}
 
-	printf("matrixM ( M = %.2f * S + (1 - %.2f) * Q ) :\n", p, p);
+	printf("matrixM ( matrixM = matrixS + matrixQ ) :\n", p, p);
 	showMatrix(matrixM);
 
 	return matrixM;
@@ -367,19 +367,23 @@ std::vector<double> GooglePageRank::initRank(std::vector<double>matrixRank)
 std::vector<double> GooglePageRank::getRank(std::vector< std::vector<double> > matrixM, std::vector<double>matrixRank)
 {
 	double sum;
+	std::vector<double> tempMatrixRank;
 
-	for (int i = 0; i < matrixRank.size(); i++)
-	{
-		sum = 0;
+	do {
+		tempMatrixRank = matrixRank;
 
-		for (int j = 0; j < matrixM.size(); j++)
+		for (int i = 0; i < matrixRank.size(); i++)
 		{
-			sum += matrixM[i][j];
+			sum = 0;
+
+			for (int j = 0; j < matrixM.size(); j++)
+			{
+				sum += tempMatrixRank[j] * matrixM[i][j];
+			}
+
+			matrixRank[i] = sum;
 		}
-
-		matrixRank[i] *= sum;
-
-	}
+	} while (matrixRank != tempMatrixRank);
 
 	return matrixRank;
 
@@ -409,7 +413,7 @@ void GooglePageRank::showMatrix(std::vector< std::vector<double> > matrix)
 		std::cout << " ";
 		for (int j = 0; j < matrix.size(); j++)
 		{
-			std::cout << std::setw(8) << std::left << matrix[i][j];
+			std::cout << std::setw(10) << std::left << matrix[i][j] << " ";
 		}
 		std::cout << "\n";
 	}
