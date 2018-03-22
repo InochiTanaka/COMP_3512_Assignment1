@@ -16,103 +16,53 @@ GooglePageRank::GooglePageRank()
 	std::vector< std::vector<double> > matrixS;
 
 	std::vector< std::vector<double> > matrixM;
-
 	std::vector<double> matrixRank;
 
 	std::string fileName = "connec-tivity.txt";
 
+	//Get matrix data from text file 
 	printf("Initial input Data:\n");
 	listW = getData(fileName);
 
+	//Make matrix by vector from listW
 	matrixG = getMatrix(listW);
-
-	//matrixG = { 
-	//	{ 0, 1, 1, 0 }, 
-	//	{ 1, 0, 1, 0 },
-	//	{ 1, 1, 0, 0 },
-	//	{ 0, 0, 0, 0 }
-	//	};
-
-	//The result should be:
-	//rank = 1.2698 / 3.999 = 0.3175
-	//	1.2698 / 3.999 0.3175
-	//	1.2698 / 3.999 0.3175
-	//	0.1905 / 3.999 0.0476
-
-	//0.3175
-	//0.3175
-	//0.3175
-	//0.0476
-
-
-
-	//matrixG = {
-	//	{0, 1, 1, 1, 1, 1, 1},
-	//	{0, 0, 0, 1, 0, 1, 1},
-	//	{0, 1, 0, 1, 1, 1, 1},
-	//	{1, 1, 1, 0, 0, 1, 1},
-	//	{1, 1, 0, 0, 0, 1, 1},
-	//	{0, 0, 1, 0, 1, 0, 1},
-	//	{1, 1, 0, 1, 0, 1, 0}
-	//};
-
-	//The result should be:
-	//A = 0.190277
-	//B = 0.095439
-	//C = 0.148268
-	//D = 0.171204
-	//E = 0.129194
-	//F = 0.120589
-	//G = 0.145029
 
 	printf("Initial input Data on Matrix:\n");
 	showMatrix(matrixG);
 
+	//Apply importance baced on each columns  
 	matrixS = ApplyImportance(matrixG);
 
-	//ApplyImportance
 	printf("ApplyImportance:\n");
 	showMatrix(matrixS);
 
-	//matrixS should be like:
-	//matrixS = {
-	//	{ 0, 0.5, 0.5, 0 },
-	//	{ 0.5, 0, 0.5, 0 },
-	//	{ 0.5, 0.5, 0, 0 },
-	//	{ 0, 0, 0, 0 }
-	//	};
-
+	//Apply Probability baced on each columns 
 	matrixS = ApplyProbability(matrixS);
 
 	printf("ApplyProbability:\n");
 	showMatrix(matrixS);
 
-	//matrixS = ApplyAdjust(matrixS);
-
-	//matrixS should be like:
-	//matrixS = {
-	//	{ 0, 0.5, 0.5, 0.25 },
-	//	{ 0.5, 0, 0.5, 0.25 },
-	//	{ 0.5, 0.5, 0, 0.25 },
-	//	{ 0, 0, 0, 0.25 }
-	//	};
-
+	//Apply Transition baced on each columns 
 	printf("ApplyTransition:\n");
-
 	matrixM = ApplyTransition(matrixS);
 
+	//initialize matrixRank
 	matrixRank.resize(matrixM.size());
 	matrixRank = initRank(matrixRank);
+
+	//Calcurate matrixM multiply by matrixRank
 	matrixRank = getRank(matrixM, matrixRank);
 
 	printf("Page Rank before divide by sum:\n");
 	showRank(matrixRank);
 	
+	//Calcurate PageRank from matrixRank
 	matrixRank = getPageRank(matrixRank);
 	printf("Page Rank:\n");
 	showRank(matrixRank);
 }
 
+//Get matrix data from text file and show it as line from
 std::vector<double> GooglePageRank::getData(std::string fileName)
 {
 	std::string str;
@@ -137,6 +87,7 @@ std::vector<double> GooglePageRank::getData(std::string fileName)
 	return list;
 }
 
+//Make matrix by vector from listW
 std::vector< std::vector<double> > GooglePageRank::getMatrix(std::vector<double> list)
 {
 	std::string str;
@@ -150,26 +101,21 @@ std::vector< std::vector<double> > GooglePageRank::getMatrix(std::vector<double>
 		matrix[i].resize(sqrtNumList);
 	}
 
-	//try// ((int)sqrtNumList*(int)sqrtNumList == (double)list.size())
-	//{
-		int count = 0;
-		for (int i = 0; i < matrix.size(); i++)
+	int count = 0;
+	for (int i = 0; i < matrix.size(); i++)
+	{
+		for (int j = 0; j < matrix.size(); j++)
 		{
-			for (int j = 0; j < matrix.size(); j++)
-			{
 
-				matrix[i][j] = list[count++];
-			}
+			matrix[i][j] = list[count++];
 		}
-	//}
-	//catch()
-	//{
-	//	throw "Exception : Input Data is not good for Matrix\n";
-	//}
+	}
 
 	return matrix;
 }
 
+//Apply importance baced on each columns. 
+//Each part which has connection will get number od 1 / number of connection
 std::vector< std::vector<double> > GooglePageRank::ApplyImportance(std::vector< std::vector<double> > matrix)
 {
 	int count;
@@ -200,6 +146,8 @@ std::vector< std::vector<double> > GooglePageRank::ApplyImportance(std::vector< 
 	return matrix;
 }
 
+//Apply Probability baced on each columns 
+//Each part which has connection will get number od 1 / number of pages
 std::vector< std::vector<double> > GooglePageRank::ApplyProbability(std::vector< std::vector<double> > matrix)
 {
 	double sum;
@@ -228,31 +176,8 @@ std::vector< std::vector<double> > GooglePageRank::ApplyProbability(std::vector<
 	return matrix;
 }
 
-std::vector< std::vector<double> > GooglePageRank::ApplyAdjust(std::vector< std::vector<double> > matrix)
-{
-	double sum;
-	double magnif;
-
-	for (int i = 0; i < matrix.size(); i++)
-	{
-		sum = 0;
-		
-		for (int j = 0; j < matrix.size(); j++)
-		{
-			sum += matrix[i][j];
-		}
-
-		magnif = 1 / sum;
-
-		for (int j = 0; j < matrix.size(); j++)
-		{
-			matrix[i][j] *= magnif;
-		}
-	}
-
-	return matrix;
-}
-
+//Apply Transition which calcurate for matrinX
+//After initializing matrixQ and, matrixM, calculate for S and Q, finally conbine these two as the result
 std::vector< std::vector<double> > GooglePageRank::ApplyTransition(std::vector< std::vector<double> > matrix)
 {
 	std::vector< std::vector<double> > matrixS = matrix;
@@ -263,9 +188,9 @@ std::vector< std::vector<double> > GooglePageRank::ApplyTransition(std::vector< 
 	matrixS = prepareS(matrixS, p);// Get S'
 	matrixQ = prepareQ(matrixQ, p);// Get Q'
 
-	printf("matrixS ( matrixS = %.2f * S ) :\n");
+	printf("matrixS ( matrixS = %.2f * S ) :\n", p);
 	showMatrix(matrixS);
-	printf("matrixQ ( matrixQ = (1 - %.2f ) * Q) :\n");
+	printf("matrixQ ( matrixQ = (1 - %.2f ) * Q) :\n", p);
 	showMatrix(matrixQ);
 
 	//M = S' + Q'
@@ -277,12 +202,12 @@ std::vector< std::vector<double> > GooglePageRank::ApplyTransition(std::vector< 
 		}
 	}
 
-	printf("matrixM ( matrixM = matrixS + matrixQ ) :\n", p, p);
+	printf("matrixM ( matrixM = matrixS + matrixQ ) :\n");
 	showMatrix(matrixM);
 
 	return matrixM;
 }
-
+//initializing matrixQ which filled up by 1 / (double)matrix.size();
 std::vector< std::vector<double> > GooglePageRank::initMatrixQ(int size)
 {
 	std::vector< std::vector<double> > matrix;
@@ -308,6 +233,7 @@ std::vector< std::vector<double> > GooglePageRank::initMatrixQ(int size)
 	return matrix;
 }
 
+//initializing matrixM which filled up by 0;
 std::vector< std::vector<double> > GooglePageRank::initMatrixM(int size)
 {
 	std::vector< std::vector<double> > matrix;
@@ -323,6 +249,7 @@ std::vector< std::vector<double> > GooglePageRank::initMatrixM(int size)
 	return matrix;
 }
 
+//calculate p * S and return the result
 std::vector< std::vector<double> > GooglePageRank::prepareS(std::vector< std::vector<double> >matrixS, double p)
 {
 	// S' = p * S
@@ -338,6 +265,7 @@ std::vector< std::vector<double> > GooglePageRank::prepareS(std::vector< std::ve
 	return matrixS;
 }
 
+//calculate(1 - p) * Q and return the result
 std::vector< std::vector<double> > GooglePageRank::prepareQ(std::vector< std::vector<double> >matrixQ, double p)
 {
 	// Q' = (1 - p) * Q;
@@ -352,18 +280,20 @@ std::vector< std::vector<double> > GooglePageRank::prepareQ(std::vector< std::ve
 	return matrixQ;
 }
 
+//initialize matrixRank fill 1 to each vector 
 std::vector<double> GooglePageRank::initRank(std::vector<double>matrixRank)
 {
+
 	for (int i = 0; i < matrixRank.size(); i++)
 	{
-
 		matrixRank[i] = 1;
-
 	}
 
 	return matrixRank;
 }
 
+//Calcurate matrixM multiply by matrixRank
+//And return the result
 std::vector<double> GooglePageRank::getRank(std::vector< std::vector<double> > matrixM, std::vector<double>matrixRank)
 {
 	double sum;
@@ -389,6 +319,9 @@ std::vector<double> GooglePageRank::getRank(std::vector< std::vector<double> > m
 
 }
 
+//Calcurate PageRank from matrixRank
+//Devide each vector array by sum of total array
+//This calculation will continue the result is not changing for converging.
 std::vector<double> GooglePageRank::getPageRank(std::vector<double> matrix)
 {
 	double sum = 0;
@@ -406,6 +339,7 @@ std::vector<double> GooglePageRank::getPageRank(std::vector<double> matrix)
 	return matrix;
 }
 
+//Display Matrix
 void GooglePageRank::showMatrix(std::vector< std::vector<double> > matrix)
 {
 	for (int i = 0; i < matrix.size(); i++)
@@ -421,6 +355,7 @@ void GooglePageRank::showMatrix(std::vector< std::vector<double> > matrix)
 	std::cout << "\n";
 }
 
+//Display RankList
 void GooglePageRank::showRank(std::vector<double> matrix)
 {
 	for (int i = 0; i < matrix.size(); i++)
